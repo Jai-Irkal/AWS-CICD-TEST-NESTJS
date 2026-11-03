@@ -3,7 +3,7 @@ import { AppService } from './app.service';
 
 @Controller()
 export class AppController {
-  constructor(private readonly appService: AppService) {}
+  constructor(private readonly appService: AppService) { }
 
   @Get()
   getHello(): string {
@@ -15,6 +15,8 @@ export class AppController {
     return {
       status: 'UP',
       application: 'nestjs-cicd-demo',
+      version: '2.0',
+      environment: 'production',
       timestamp: new Date().toISOString(),
     };
   }
