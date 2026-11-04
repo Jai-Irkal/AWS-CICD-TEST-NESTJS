@@ -12,6 +12,7 @@ export class AppController {
 
   @Get('health')
   getHealth() {
+    
     return {
       status: 'UP',
       application: 'nestjs-cicd-demo',
