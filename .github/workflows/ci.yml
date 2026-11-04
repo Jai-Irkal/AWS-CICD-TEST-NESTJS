@@ -1,5 +1,5 @@
 
-name: NestJS CI
+name: NestJS CI and ECR Publish
 
 on:
   push:
@@ -11,6 +11,11 @@ on:
 
 permissions:
   contents: read
+  id-token: write
+
+env:
+  AWS_REGION: us-east-1
+  ECR_REPOSITORY: nestjs-cicd-demo
 
 jobs:
   build-and-test:
@@ -35,3 +40,25 @@ jobs:
 
       - name: Build application
         run: npm run build
+
+      - name: Configure AWS credentials
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::422169036124:role/GitHubActionsECRPushRole
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        id: ecr-login
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build and push Docker image
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: |
+            422169036124.dkr.ecr.us-east-1.amazonaws.com/nestjs-cicd-demo:${{ github.sha }}
+            422169036124.dkr.ecr.us-east-1.amazonaws.com/nestjs-cicd-demo:latest
